@@ -1,0 +1,63 @@
+\documentclass{SBCbookchapter}
+
+% Fontes
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% Língua
+\usepackage[brazilian]{babel}
+
+% Figuras
+\usepackage{graphicx}
+\graphicspath{{img/}}
+
+% Referências
+\usepackage[brazilian]{backref}
+\usepackage[alf]{abntex2cite}
+
+% Serpa
+
+\usepackage{booktabs} 
+\usepackage{tikz}
+\usepackage{listings,xcolor}
+\usepackage[framed,numbered,autolinebreaks,useliterate]{mcode}
+
+\newcounter{chapter}\setcounter{chapter}{1}
+
+\author{\textbf{Matheus da Silva Serpa}\\ \textit{msserpa@inf.ufrgs.br}\\ \textit{Grupo de Processamento Paralelo e Distribuído (GPPD) \\ Universidade Federal do Rio Grande do Sul (UFRGS) \\ Sala 201, Av. Bento Gonçalves, 9500 - Campus do Vale\\ 91.501-970 - Porto Alegre - RS - Brasil}\\~\\
+\textbf{Philippe Olivier Alexandre Navaux}\\ \textit{navaux@inf.ufrgs.br}\\ \textit{Grupo de Processamento Paralelo e Distribuído (GPPD) \\ Universidade Federal do Rio Grande do Sul (UFRGS) \\ Sala 210, Av. Bento Gonçalves, 9500 - Campus do Vale\\ 91.501-970 - Porto Alegre - RS - Brasil}\\~\\
+\textbf{Jairo Panetta}\\ \textit{jairo.panetta@gmail.com}\\ \textit{Divisão de Ciência da Computação (IEC) \\ Instituto Tecnológico de Aeronáutica (ITA) \\ Sala 109, Praça Marechal Eduardo Gomes, 50 - Vila das Acácias \\ 12228-900 - São José dos Campos - SP - Brasil} } 
+
+
+\title{Programação com Aceleradores Vetoriais}
+
+\definecolor{mygreen}{RGB}{2,112,10}
+
+\newlength\listingnumberwidth
+\setlength\listingnumberwidth{10pt}
+\lstset{
+  showstringspaces=false,
+  language=C,
+  escapeinside={@}{@},
+  basicstyle=\small\ttfamily,
+  numbersep=5pt,
+  breaklines=true
+}
+
+\newcommand{\ms}[1]{\textcolor{red}{\textbf{msserpa: #1} }}
+
+\begin{document}
+\maketitle
+
+\input{sections/abstract}
+\input{sections/introduction}
+\input{sections/architecture}
+\input{sections/parallel}
+\input{sections/openmp}
+\input{sections/counters}
+\input{sections/experiments}
+\input{sections/conclusion}
+
+\bibliography{referencias}
+
+\end{document}

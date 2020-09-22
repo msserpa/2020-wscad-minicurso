@@ -1,0 +1,144 @@
+\section{Avaliação de Desempenho com Contadores de \textit{Hardware}} \label{sec:contadores}
+
+Em arquitetura de computadores, contadores de desempenho de \textit{hardware} são um conjunto de registradores de finalidade especial, os quais são incorporados nos processadores modernos para armazenar a contagem de atividades relacionadas ao seu funcionamento e desempenho. Usuários, pesquisadores e desenvolvedores utilizam esses contadores para analisar e otimizar o desempenho de processadores.
+
+O número de contadores de \textit{hardware} disponíveis em um processador é limitado, sendo que isso varia de modelo de processador. Também existem limitações a quantos contadores podem ser medidos ao mesmo tempo. Para ler esses registradores podem ser necessárias permissões especiais no sistema operacional, além da utilização de alguma ferramenta disponível no sistema. Duas ferramentas conhecidas que realizam as chamadas de sistema necessárias para isso são o perf (\emph{Performance Counters for Linux}) e o PAPI (\emph{Performance Application Programming Interface}). Ambos serão vistos a seguir.
+
+\subsection{Linux perf} \label{sec:perf}
+
+O Linux \emph{perf} é uma ferramenta de análise de desempenho disponível no Linux, desde o \textit{kernel} 2.6~\cite{DeMelo2010, weaver2013linux}. A ferramenta é chamada a partir da linha de comando e permite criar perfis estatísticos de todo sistema e de aplicações específicas. Na Tabela~\ref{tab:perf:events}, podemos ver alguns exemplos de eventos que o \emph{perf} mede. 
+
+\begin{table}[!htb]
+    \centering
+    \caption{Alguns eventos medidos pelo Perf}
+    \label{tab:perf:events}
+    \begin{tabular}{ll}
+        \toprule
+        Evento Perf     & Descrição                 \\ \midrule
+
+        \texttt{L1-dcache-loads}  & \textit{Loads} na \textit{cache} L1      \\
+        \texttt{L1-dcache-load-misses}  & \textit{Misses} na \textit{cache} L1      \\
+        \texttt{LLC-loads}  & \textit{Loads} na \textit{cache} de último nível      \\
+        \texttt{LLC-load-misses}  & \textit{Misses} na \textit{cache} de último nível      \\
+        \midrule
+        \texttt{simd\_fp\_256.packed\_single}  & Operações de precisão simples AVX-256  \\
+        \texttt{simd\_fp\_256.packed\_double}  & Operações de precisão dupla   AVX-256  \\
+        \midrule
+        \texttt{instructions}  & Total de instruções \\
+        \texttt{cycles}  & Total de ciclos \\
+        \midrule
+        \texttt{SMT\_2T\_Utilization}  & Fração de ciclos que utilizou SMT \\
+        \texttt{GFLOPs}  & Giga operações de ponto flutuante por segundo \\
+        \texttt{IPC}  & Instruções por ciclo \\
+        \texttt{ILP}  & Paralelismo em nível de instrução \\
+        \texttt{MLP}  & Paralelismo em nível de memória \\
+         \bottomrule
+    \end{tabular}
+\end{table}
+
+Para listar os eventos do perf disponíveis na arquitetura alvo basta digita o comando: 
+\begin{lstlisting}[frame=none, numbers=none]
+@\textcolor{mygreen}{\$ perf list}@
+List of pre-defined events (to be used in -e):
+
+branch-instructions
+branch-misses
+cache-misses
+cache-references
+cpu-cycles
+instructions
+\end{lstlisting}
+
+Após, é possível medir os contadores de uma aplicação especifica com o comando: 
+
+\begin{lstlisting}[frame=none, numbers=none]
+@\textcolor{mygreen}{\$ perf stat -e cache-misses,cache-references ./mult 2048}@
+     Performance counter stats for mult 2048:
+
+        8.175.407.685    cache-misses         #95,2%
+        8.591.351.092    cache-references 
+\end{lstlisting}
+
+A partir disso, pode-se fazer alguma otimização de \textit{cache} e executar novamente:
+\begin{lstlisting}[frame=none, numbers=none]
+@\textcolor{mygreen}{\$ perf stat -e cache-misses,cache-references ./mult 2048}@
+     Performance counter stats for mult 2048:
+
+        112.800.963     cache-misses         #34,1%
+        330.311.356     cache-references
+\end{lstlisting}
+
+
+\subsection{Performance Application Programming Interface (PAPI)} \label{sec:papi}
+
+Outra forma de medir contadores de desempenho de \textit{hardware} é utilizando a ferramenta PAPI\cite{terpstra2010collecting, weaver2012measuring, johnson2012papi}. 
+Essa ferramenta, fornece acesso a vários contadores de \textit{hardware} do processador, como por exemplo o número de instruções de um determinado tipo e a taxa de acerto da memória \textit{cache}. Na Tabela~\ref{tab:papi:events}, pode-se ver alguns exemplos de eventos que o PAPI mede.
+
+\begin{table}[!htb]
+    \centering
+    \caption{Alguns eventos medidos pelo PAPI}
+    \label{tab:papi:events}
+    \begin{tabular}{ll}
+        \toprule
+        Evento PAPI     & Descrição                 \\ \midrule
+
+        \texttt{PAPI\_L1\_TCM}  & \textit{Misses} na \textit{cache} L1      \\
+        \texttt{PAPI\_L2\_TCM}  & \textit{Misses} na \textit{cache} L2      \\
+        \texttt{PAPI\_L3\_TCM}  & \textit{Misses} na \textit{cache} L3      \\
+        \midrule
+        \texttt{PAPI\_BR\_INS}  & Instruções de \textit{branch}       \\
+        \texttt{PAPI\_VEC\_SP}  & Instruções de ponto flutuante de precisão simples \\
+        \texttt{PAPI\_VEC\_DP}  & Instruções de ponto flutuante de precisão dupla \\
+        \texttt{PAPI\_INT\_INS} & Instruções de inteiro        \\
+        \texttt{PAPI\_LD\_INS}  & Instruções de \textit{load}           \\
+        \texttt{PAPI\_SR\_INS}  & Instruções de \textit{store}          \\
+        \texttt{PAPI\_TOT\_INS} & Total de instruções      \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Diferente do Linux Perf, a ferramenta PAPI é mais baixo nível sendo necessárias alterações no código fonte da aplicação ou a criação de uma biblioteca a ser carregada no código binário via \texttt{LD\_PRELOAD}~\cite{pulo2009fun, cieslak2015dynamic}. A compilação de um programa OpenMP que utilizada PAPI, com o compilador \texttt{gcc}, necessita da opção \texttt{-lpapi}, como no exemplo abaixo:
+
+\begin{lstlisting}[frame=none, numbers=none]
+@\textcolor{mygreen}{\$ gcc -fopenmp -o hello hello.c -lpapi }@
+\end{lstlisting}
+
+A Figura~\ref{fig:papi:tool} ilustra as funções e a ordem necessária para inicializar o PAPI e medir o desempenho de um código em OpenMP, por exemplo. Na linha 1, incluiu-se a biblioteca PAPI. Após, na linha 4 inicializou-se a biblioteca. Na linha 7 definiu-se um conjunto de eventos. Nesse conjunto, na linha 10, adicionou-se o evento \texttt{PAPI\_TOT\_INS}, que mede o número total de instruções que o programa executa. Na linha 13, definiu-se o início da medição de desempenho. A linha 15 representa uma ou mais linhas de um programa em C que se deseja medir o desempenho. Esse programa pode ser todo o programa ou apenas um trecho de código como, por exemplo, uma função específica. 
+Após a execução desse programa, na linha 18, parou-se a medição do PAPI. Na linha 21, removeu-se o evento \texttt{PAPI\_TOT\_INS}. Por fim, nas linhas 24 e 27, desligou-se o conjunto de eventos e a biblioteca PAPI. Na linha 29 é mostrado na tela o resultado da métrica medida.
+
+\begin{figure}[!htb]
+\centering
+\begin{lstlisting}
+#include<papi.h>
+
+/* Inicia a biblioteca PAPI */
+PAPI_library_init(PAPI_VER_CURRENT);
+
+/* Inicia o conjunto de eventos */
+PAPI_create_eventset(&EventSet);
+
+/* Adiciona o evento PAPI_TOT_INS */
+PAPI_add_named_event(EventSet, "PAPI_TOT_INS");
+
+/* Inicia o PAPI */
+PAPI_start(EventSet);
+
+/* PROGRAMA QUE DESEJA-SE MEDIR O DESEMPENHO */
+
+/* Para o PAPI */
+PAPI_stop(EventSet, value);
+
+/* Remove o evento PAPI_TOT_INS */
+PAPI_remove_named_event(EventSet, "PAPI_TOT_INS");
+
+/* Desliga o conjunto de eventos */
+PAPI_destroy_eventset(&EventSet);
+
+/* Desliga o PAPI */
+PAPI_shutdown();
+
+/* Mostra o resultado na tela */
+printf("PAPI_TOT_INS = %d\n", value[0]);
+\end{lstlisting}
+\caption{Exemplo de como medir desempenho utilizando PAPI.}
+\label{fig:papi:tool}
+\end{figure}
